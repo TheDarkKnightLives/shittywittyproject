@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Student Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+        .bg-img {
+            background-image: url("/static/images/background.jpg"); /* Ensure this image exists in your static folder */
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .bg-img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4); /* Dark overlay for better text readability */
+            z-index: 1;
+        }
+        .container {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            font-weight: 600;
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background: blue;
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+        b {
+            display: block;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: blue;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 0, 255, 0.3);
+        }
+        .button {
+            background-color: blue;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .button:hover {
+            background-color: darkblue;
+            transform: scale(1.05);
+        }
+        .flash {
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 6px;
+            width: 100%;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-img">
+        <div class="container">
+            <h1>Student Details</h1>
+            <form action="/" method="post">
+                <b>Email</b>
+                <input type="text" placeholder="Enter your email" name="email" required>
+                <b>Name</b>
+                <input type="text" placeholder="Enter your name" name="username" required>
+                <b>Rollno</b>
+                <input type="text" placeholder="Enter your rollno" name="rno" required>
+                <b>Phone</b>
+                <input type="text" placeholder="Enter your Phone no" name="phn" required>
+                <b>Department</b>
+                <input type="text" placeholder="Enter your department" name="dpt" required>
+                <b>Batch</b>
+                <input type="text" placeholder="Enter your Batch" name="btch" required>
+                <button type="submit" class="button">Submit</button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</body>
+</html>
