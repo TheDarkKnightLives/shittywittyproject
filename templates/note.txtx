@@ -1,10 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Student Form</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
+<style>
         body {
             height: 100%;
             font-family: Arial, sans-serif;
@@ -111,49 +105,3 @@
             border: 1px solid #c3e6cb;
         }
     </style>
-</head>
-<body>
-    <div class="bg-img">
-        <div class="container">
-            <h1>Student Details</h1>
-            <form action="/" method="post" enctype="multipart/form-data">
-                <b>Email</b>
-                <input type="text" placeholder="Enter your email" name="email" required>
-                <b>Name</b>
-                <input type="text" placeholder="Enter your name" name="name" required>
-                <b>Rollno</b>
-                <input type="text" placeholder="Enter your rollno" name="rollno" required>
-                <b>Phone</b>
-                <input type="text" placeholder="Enter your phone no" name="phone" required>
-                <b>On Campus</b>
-                <input type="text" placeholder="On campus" name="on_campus">
-                <b>Off Campus</b>
-                <input type="text" placeholder="Off campus" name="off_campus">
-                <b>Package</b>
-                <input type="text" placeholder="Package" name="package">
-                <b>Name of the Course</b>
-                <input type="text" placeholder="Name of the course" name="course_name">
-                <b>Name of the College</b>
-                <input type="text" placeholder="Name of the college" name="college_name">
-                <b>Name of the Company</b>
-                <input type="text" placeholder="Name of the company" name="company_name">
-                <b>Annual Turnover</b>
-                <input type="text" placeholder="Annual turnover" name="annual_turnover">
-                <b>Evidence (Image)</b>
-                <input type="file" accept="image/*" name="evidence_image">
-                <b>Evidence (PDF)</b>
-                <input type="file" accept=".pdf" name="evidence_pdf">
-                <button type="submit" class="button">Submit</button>
-            </form>
-            
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="flash {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
-    </div>
-</body>
-</html>

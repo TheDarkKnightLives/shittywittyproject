@@ -14,22 +14,60 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Initialize the database
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
-cursor.execute('''CREATE TABLE IF NOT EXISTS students
-                  (email TEXT, name TEXT, rollno TEXT, phone TEXT, department TEXT, batch TEXT)''')
+cursor.execute('''
+        CREATE TABLE IF NOT EXISTS students (
+            email TEXT,
+            name TEXT,
+            rollno TEXT,
+            phone TEXT,
+            on_campus TEXT,
+            off_campus TEXT,
+            package TEXT,
+            course_name TEXT,
+            college_name TEXT,
+            company_name TEXT,
+            annual_turnover TEXT,
+            image TEXT,
+            pdf TEXT
+        )
+    ''')
 conn.commit()
 
 @app.route('/', methods=['GET', 'POST'])
 def student_form():
     if request.method == 'POST':
-        email = request.form['email']
-        name = request.form['username']
-        rollno = request.form['rno']
-        phone = request.form['phn']
-        department = request.form['dpt']
-        batch = request.form['btch']
-        
-        cursor.execute("INSERT INTO students (email, name, rollno, phone, department, batch) VALUES (?, ?, ?, ?, ?, ?)",
-                       (email, name, rollno, phone, department, batch))
+        email = request.form.get('email')
+        name = request.form.get('name')
+        rollno = request.form.get('rollno')
+        phone = request.form.get('phone')
+        on_campus = request.form.get('on_campus')
+        off_campus = request.form.get('off_campus')
+        package = request.form.get('package')
+        course_name = request.form.get('course_name')
+        college_name = request.form.get('college_name')
+        company_name = request.form.get('company_name')
+        annual_turnover = request.form.get('annual_turnover')
+
+        # Handle file uploads
+        image_file = request.files.get('evidence_image')
+        pdf_file = request.files.get('evidence_pdf')
+
+        if image_file and image_file.filename:
+            image_filename = f"{rollno}.jpg"
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            image_file.save(image_path)
+        else:
+            image_filename = None
+
+        if pdf_file and pdf_file.filename:
+            pdf_filename = f"{rollno}_doc.pdf"
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
+            pdf_file.save(pdf_path)
+        else:
+            pdf_filename = None
+
+        cursor.execute("INSERT INTO students (email, name, rollno, phone, on_campus, off_campus, package, course_name, college_name, company_name, annual_turnover, image, pdf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                       (email, name, rollno, phone, on_campus, off_campus, package, course_name, college_name, company_name, annual_turnover, image_filename, pdf_filename))
         conn.commit()
         flash('Form submitted successfully!', 'success')
         return redirect(url_for('student_form'))
@@ -91,7 +129,7 @@ def export_students():
 
     cursor.execute("SELECT * FROM students")
     data = cursor.fetchall()
-    df = pd.DataFrame(data, columns=['Email', 'Name', 'Rollno', 'Phone', 'Department', 'Batch'])
+    df = pd.DataFrame(data, columns=['Email', 'Name', 'Rollno', 'Phone', 'Department', 'Batch', 'Image', 'PDF'])
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'students.xlsx')
     df.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
