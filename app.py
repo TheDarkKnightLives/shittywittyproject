@@ -3,6 +3,8 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import sqlite3
 import os
+import zipfile
+from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -12,9 +14,10 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize the database
-conn = sqlite3.connect('database.db', check_same_thread=False)
-cursor = conn.cursor()
-cursor.execute('''
+def init_db():
+    conn = sqlite3.connect('database.db', check_same_thread=False)
+    cursor = conn.cursor()
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             email TEXT,
             name TEXT,
@@ -31,7 +34,10 @@ cursor.execute('''
             pdf TEXT
         )
     ''')
-conn.commit()
+    conn.commit()
+    conn.close()
+
+init_db()
 
 @app.route('/', methods=['GET', 'POST'])
 def student_form():
@@ -53,22 +59,26 @@ def student_form():
         pdf_file = request.files.get('evidence_pdf')
 
         if image_file and image_file.filename:
-            image_filename = f"{rollno}.jpg"
+            image_filename = secure_filename(f"{rollno}.jpg")
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
             image_file.save(image_path)
         else:
             image_filename = None
 
         if pdf_file and pdf_file.filename:
-            pdf_filename = f"{rollno}_doc.pdf"
+            pdf_filename = secure_filename(f"{rollno}_doc.pdf")
             pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
             pdf_file.save(pdf_path)
         else:
             pdf_filename = None
 
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
         cursor.execute("INSERT INTO students (email, name, rollno, phone, on_campus, off_campus, package, course_name, college_name, company_name, annual_turnover, image, pdf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                        (email, name, rollno, phone, on_campus, off_campus, package, course_name, college_name, company_name, annual_turnover, image_filename, pdf_filename))
         conn.commit()
+        conn.close()
+
         flash('Form submitted successfully!', 'success')
         return redirect(url_for('student_form'))
 
@@ -117,8 +127,11 @@ def upload_file():
             combined_df.to_excel(combined_file_path, index=False)
             return send_file(combined_file_path, as_attachment=True)
 
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM students")
     students_data = cursor.fetchall()
+    conn.close()
     return render_template('upload.html', students=students_data)
 
 @app.route('/export_students')
@@ -127,12 +140,37 @@ def export_students():
         flash('You need to login first.', 'warning')
         return redirect(url_for('login'))
 
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM students")
     data = cursor.fetchall()
-    df = pd.DataFrame(data, columns=['Email', 'Name', 'Rollno', 'Phone', 'Department', 'Batch', 'Image', 'PDF'])
+    conn.close()
+
+    df = pd.DataFrame(data, columns=['Email', 'Name', 'Rollno', 'Phone', 'On Campus', 'Off Campus', 'Package', 'Course Name', 'College Name', 'Company Name', 'Annual Turnover', 'Image', 'PDF'])
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'students.xlsx')
     df.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
+
+@app.route('/download_files')
+def download_files():
+    if 'username' not in session:
+        flash('You need to login first.', 'warning')
+        return redirect(url_for('login'))
+    
+    # Define a path for the ZIP file
+    zip_filename = 'files.zip'
+    zip_path = os.path.join(app.config['UPLOAD_FOLDER'], zip_filename)
+
+    # Create a ZIP file
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        # Add image files
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            if filename.endswith('.jpg'):
+                zipf.write(os.path.join(app.config['UPLOAD_FOLDER'], filename), filename)
+            elif filename.endswith('.pdf'):
+                zipf.write(os.path.join(app.config['UPLOAD_FOLDER'], filename), filename)
+
+    return send_file(zip_path, as_attachment=True, download_name=zip_filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

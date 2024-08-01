@@ -91,6 +91,15 @@
         input[type="file"] {
             margin-bottom: 15px;
         }
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                font-size: 14px;
+            }
+            .button {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -109,8 +118,13 @@
             <th>Name</th>
             <th>Rollno</th>
             <th>Phone</th>
-            <th>Department</th>
-            <th>Batch</th>
+            <th>On Campus</th>
+            <th>Off Campus</th>
+            <th>Package</th>
+            <th>Course Name</th>
+            <th>College Name</th>
+            <th>Company Name</th>
+            <th>Annual Turnover</th>
         </tr>
         {% for student in students %}
         <tr>
@@ -120,6 +134,11 @@
             <td>{{ student[3] }}</td>
             <td>{{ student[4] }}</td>
             <td>{{ student[5] }}</td>
+            <td>{{ student[6] }}</td>
+            <td>{{ student[7] }}</td>
+            <td>{{ student[8] }}</td>
+            <td>{{ student[9] }}</td>
+            <td>{{ student[10] }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -127,12 +146,17 @@
     <form action="/export_students" method="get">
         <button type="submit" class="button">Download Student Data as Excel</button>
     </form>
-    
+
     <h2>Upload CSV and Excel Files</h2>
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="files" multiple>
         <br>
         <button type="submit" class="button">Upload and Combine</button>
+    </form>
+
+    <h2>Download Uploaded Files</h2>
+    <form action="/download_files" method="get">
+        <button type="submit" class="button">Download All Files</button>
     </form>
 </body>
 </html>
