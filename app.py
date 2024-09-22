@@ -173,4 +173,4 @@ def download_files():
     return send_file(zip_path, as_attachment=True, download_name=zip_filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=5000)
